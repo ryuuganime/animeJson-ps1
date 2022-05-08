@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-vscode.powershell",
+    "streetsidesoftware.code-spell-checker",
+    "IronGeek.vscode-env",
+    "EditorConfig.EditorConfig"
+  ]
+}
