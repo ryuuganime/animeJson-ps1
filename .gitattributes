@@ -1,0 +1,3 @@
+# Set End-of-line to Unix format
+*            text=auto
+*.ps1        text      eol=lf
