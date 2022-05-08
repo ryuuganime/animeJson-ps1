@@ -1,0 +1,24 @@
+{
+    "name": "animejson-ps1",
+    "version": "0.0.1",
+    "description": "Automation script in PowerShell for creating Ryuuganime's Metadata JSON (Anime)",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ryuuganime/animeJson-ps1.git"
+    },
+    "keywords": [
+        "powershell",
+        "anime",
+        "json",
+        "database",
+        "generator",
+        "cli",
+        "automation"
+    ],
+    "author": "Ryuuganime",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/ryuuganime/animeJson-ps1/issues"
+    },
+    "homepage": "https://github.com/ryuuganime/animeJson-ps1#readme"
+}
