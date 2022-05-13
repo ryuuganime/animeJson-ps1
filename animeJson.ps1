@@ -4,20 +4,44 @@
 # Script Metadata
 # ===============
 
-$version = "v.0.0.1"
+$version = "v.0.0.2"
 
 # ===================
 # Import Localization
 # ===================
 
-Import-LocalizedData -BindingVariable l18n
+$localeName = Get-WinSystemLocale | foreach { $_.Name }
+
+if (-not(Test-Path -Path ./l18n/$localeName)) {
+  Write-Host "Uh-oh. We can not find the localization file for ", $localeName, ", so we temporarily replace it to English (US)" -ForegroundColor Red -Separator ""
+  Write-Host "You can change the locale in next prompt"
+  $localeName = "en-US"
+  Write-Host ""
+}
+
+Import-LocalizedData -BindingVariable l18n -UICulture $localeName -BaseDirectory ./l18n
+
+Write-Host $l18n.InitLocale_General_echo," ", $localeName, ". ", $l18n.InitLocale_General_prompt -ForegroundColor Yellow -Separator ""
+Write-Host ""
+Write-Host $l18n.InitLocale_List_echo
+Get-ChildItem ./l18n/ -Directory | foreach { $_.Name }
+$changeLocale = Read-Host -Prompt $l18n.InitLocale_Replace_Prompt
+
+if (-not($changeLocale)) {
+  Import-LocalizedData -BindingVariable l18n -BaseDirectory ./l18n
+  $changeLocale = $localeName
+} else {
+  Import-LocalizedData -BindingVariable l18n -UICulture $changeLocale -BaseDirectory ./l18n
+}
+
+Write-Host $l18n.InitLocale_Replace_success, $changeLocale -ForegroundColor Green
 
 # =========
-# Functions
+# Core Functions
 # =========
 
 function Get-Root() {
-  if ($UID -ne 0) {
+  if ($UID -eq 0) {
     Write-Host $l18n.GetRoot_General_e1 -ForegroundColor Red
     exit 1 # User did not run the script as administrator/root
   } else {
@@ -26,7 +50,7 @@ function Get-Root() {
 }
 
 function Get-RootNegate() {
-  if ($UID -ne 0) {
+  if ($UID -eq 0) {
     Write-Host $l18n.GetRoot_Negate_General_success -ForegroundColor Green
   } else {
     Write-Host $l18n.GetRoot_Negate_General_e1 -ForegroundColor Red
@@ -202,6 +226,8 @@ if (Test-Path -Path ".env") {
   $insertData = Read-Host -Prompt $l18n.General_Answer
   if ($insertData -eq "y") {
     Write-Host "Inserting data into .env file..."
+
+    # Contributor profile
   } else {
     Write-Host "Please to edit .env from your preferred text editor"
     exit 4 # User choosed to exit the script

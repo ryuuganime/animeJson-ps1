@@ -2,6 +2,12 @@
 ConvertFrom-StringData @'
   General_Answer                      = Answer
 
+  InitLocale_General_echo             = System automatically set the language for the script to
+  InitLocale_General_prompt           = Do you want to change the language to else?
+  InitLocale_List_echo                = Currently available languages:
+  InitLocale_Replace_prompt           = Write language code. Press enter/return key to keep the language
+  InitLocale_Replace_success          = Successfuly changed the script language to
+
   InitScript_echo                     = Do you want to initialize script (requires root/admin)? (y/n)
   InitScript_success                  = Script initialized successfully. Please rerun the script normally (without root/admin)
 
