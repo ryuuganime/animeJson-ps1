@@ -1,6 +1,7 @@
 #culture="en-US"
 ConvertFrom-StringData @'
   General_Answer                      = Answer
+  General_Query                       = Query
 
   InitLocale_General_echo             = System automatically set the language for the script to
   InitLocale_General_prompt           = Do you want to change the language to else?
@@ -37,9 +38,9 @@ ConvertFrom-StringData @'
   GetModule_Module_Npm_Installed_e3   = npm is not installed, please install manually
   GetModule_Module_Npm_Installed_echo = Visit https://nodejs.org/en/download/ for more information
   GetModule_Module_Choco_Npm_echo     = Installing npm via Chocolatey...
-  GetModule_Npm_Packages_echo         = Installing npm packages...
-  GetModule_Npm_Packages_success      = npm packages installed successfully
-  GetModule_Npm_Packages_e3           = npm packages failed to install
+  GetModule_Npm_Packages_echo         = Installing npm dependencies...
+  GetModule_Npm_Packages_success      = npm dependencies installed successfully
+  GetModule_Npm_Packages_e3           = npm dependencies failed to install
 
   OutFile_General_echo                = Creating init_success file
   OutFile_General_success             = init_success file created
