@@ -6,7 +6,7 @@
     1 : User did not run the script as administrator/root
     2 : User runs the script on unsupported OS
     3 : Dependencies/modules/packages are not installed
-    4 : User choosed to exit the script
+    4 : User requires to manually configure the file
     5 : File is not exist
     6 : Connection handshake failed
 
