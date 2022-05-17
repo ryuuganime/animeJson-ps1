@@ -215,7 +215,7 @@ if ($false -eq $checkInitFile) {
       Write-Host $i18n.GetOS_IsLinux_echo
       Get-NotRoot
       Invoke-Init
-    } elseif ($IsMac -or $ENV:OS) {
+    } elseif ($IsMacOS -or $ENV:OS) {
       Write-Host $i18n.GetOS_IsMac_echo
       Get-NotRoot
       Invoke-Init
@@ -260,7 +260,7 @@ if ($IsWindows -or $ENV:OS) {
 } elseif ($IsLinux -or $ENV:OS) {
   Write-Host $i18n.GetOS_IsLinux_echo
   Get-NotRoot
-} elseif ($IsMac -or $ENV:OS) {
+} elseif ($IsMacOS -or $ENV:OS) {
   Write-Host $i18n.GetOS_IsMac_echo
   Get-NotRoot
 } else {
