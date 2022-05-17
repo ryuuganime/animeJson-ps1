@@ -6,6 +6,14 @@
 
 $version = "v.0.0.2"
 
+# =====
+# Intro
+# =====
+
+Clear-Host
+Write-Host "Ryuuganime Anime Metadata JSON Generator", $version -ForegroundColor Blue
+Write-Host ""
+
 # ===================
 # Import Localization
 # ===================
@@ -15,14 +23,14 @@ if ($IsWindows -or $ENV:OS) {
   $localeName = Get-WinSystemLocale | ForEach-Object { $_.Name }
 } else {
   Write-Host "Uhm, this is kinda awkward..." -ForegroundColor Red
-  Write-Host "Since you are currently using non-Windows OS, we automatically set the locale to English US as the cmdlet (Get-WinSystemLocale) is can not be installed on another system. Create an issue on their GitHub repo to implement the module natively, we guess." -ForegroundColor Red
+  Write-Host "Since you are currently using non-Windows OS, we automatically set the locale to English US as the cmdlet (Get-WinSystemLocale) to autoselect locale is can not be installed on another system. Create an issue on PowerShell Official GitHub repo to implement the module natively, we guess." -ForegroundColor Red
   Write-Host ""
   $localeName = "en-US"
 }
 
 # Write a warning when user used locale that doesn't translated yet.
 if (-not(Test-Path -Path ./i18n/$localeName)) {
-  Write-Host "Uh-oh. We can not find the localization file for ", $localeName, ", so we temporarily replace it to English (US)" -ForegroundColor Red -Separator ""
+  Write-Host "Uh-oh. We can not find the localization file for $($localeName), so we temporarily replace it to English (US)" -ForegroundColor Red
   Write-Host "You can change the locale in next prompt"
   $localeName = "en-US"
   Write-Host ""
@@ -33,7 +41,7 @@ Import-LocalizedData -BindingVariable i18n -UICulture $localeName -BaseDirectory
 Write-Host $i18n.InitLocale_General_echo," ", $localeName, ". ", $i18n.InitLocale_General_prompt -ForegroundColor Yellow -Separator ""
 Write-Host ""
 Write-Host $i18n.InitLocale_List_echo
-Get-ChildItem ./i18n/ -Directory | ForEach-Object { $_.Name }
+(Get-ChildItem ./i18n/ -Directory | ForEach-Object { $_.Name }) -Join ", "
 $changeLocale = Read-Host -Prompt $i18n.InitLocale_Replace_Prompt
 
 if (-not($changeLocale)) {
@@ -51,6 +59,8 @@ Write-Host $i18n.InitLocale_Replace_success, $changeLocale -ForegroundColor Gree
 
 $whoAmI = whoami
 
+$switchNsfwBoolean = if ("true" -eq $env:SHOW_NSFW){"false"} elseif ("false" -eq $env:SHOW_NSFW) {"true"} else {"true"}
+
 # =========
 # Core Functions
 # =========
@@ -62,6 +72,10 @@ function Get-NotRoot() {
     Write-Host $i18n.GetNotRoot_General_e1 -ForegroundColor Red
     exit 1 # User did not run the script as administrator/root
   }
+}
+
+function Install-Chocolatey {
+  Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 }
 
 function Invoke-Init() {
@@ -125,7 +139,7 @@ function Invoke-Init() {
           Write-Host "npm", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
         } else {
           Write-Host "Chocolatey", $i18n.GetModule_Module_Installed_e3 -ForegroundColor Red
-          Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          Install-Chocolatey
         }
       } else {
         Write-Host $i18n.GetModule_Module_Npm_Installed_e3 -ForegroundColor Red
@@ -137,6 +151,18 @@ function Invoke-Init() {
       exit 3 # Dependencies/modules/packages are not installed
     }
   }
+}
+
+function Invoke-RESTQuery {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string]$Uri,
+    [Parameter(Mandatory=$true)]
+    [string]$JSONProperty,
+    [Parameter(Mandatory=$true)]
+    [string[]]$Objects
+  )
+  (ConvertFrom-Json (Invoke-WebRequest -Uri $Uri).content | Select-Object -Expand $JSONProperty) | Select-Object $Objects | Format-Table
 }
 
 # ==============================
@@ -163,6 +189,7 @@ $checkInitFile = Test-Path -Path "init_success"
 
 if ($false -eq $checkInitFile) {
 
+  Write-Host ""
   Write-Host $i18n.InitScript_echo -ForegroundColor Yellow
   $initScriptResponse = Read-Host -Prompt $i18n.General_Answer
 
@@ -287,4 +314,20 @@ if ($null -ne $searchQueryRaw) {
 }
 
 # Search on MyAnimeList and get the anime metadata
-Write-Host $i18n.Greetings_Search_echo -ForegroundColor Yellow
+Write-Host $i18n.Greetings_Search_echo, "MyAnimeList:", `"$searchQueryRaw`" -ForegroundColor Yellow
+Invoke-RESTQuery -Uri "https://api.jikan.moe/v4/anime?q=$($searchQueryEncoded)&limit=25&sfw=$($switchNsfwBoolean)" -JSONProperty "data" -Objects mal_id,title,type,year,status
+
+Write-Host $i18n.Query_GrabID_prompt -ForegroundColor Yellow
+$entry_id_MAL = Read-Host -Prompt $i18n.General_Query
+
+# Write-Host $i18n.Greetings_Search_echo, "AniList:", `"$searchQueryRaw`" -ForegroundColor Yellow
+# $anilistGQLSearchMALID = '
+#   query Media($idMal: Int) {
+#     Media(idMal: $idMal) {
+#       id
+#     }
+#   }
+# '
+# $anilistGQLSearchVars = '
+#   idMal: $($entry_id_MAL)
+# '
