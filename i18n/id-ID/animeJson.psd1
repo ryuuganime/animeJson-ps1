@@ -35,7 +35,7 @@ ConvertFrom-StringData @'
   GetModule_Module_Installed_e3       = belum terpasang, memasangkan...
   GetModule_Module_Choco_echo         = Memeriksa jika Chocolatey terpasang...
   GetModule_Module_Choco_Installed_e3 = Apakah kamu ingin memasankan npm melalui Chocolater? (y/n)
-  GetModule_Module_Npm_Installed_e3   = npm belum terpasang, silakan pasang secara manuak
+  GetModule_Module_Npm_Installed_e3   = npm belum terpasang, silakan pasang secara manual
   GetModule_Module_Npm_Installed_echo = Kunjungi https://nodejs.org/en/download/ untuk informasi lebih lanjut
   GetModule_Module_Choco_Npm_echo     = Memasangkan npm melalui Chocolatey...
   GetModule_Npm_Packages_echo         = Mengunduh dependensi npm...
@@ -52,4 +52,7 @@ ConvertFrom-StringData @'
 
   Greetings_General_echo              = Selamat datang kembali,
   Greetings_Init_echo                 = Mulailah mengetik judul metadata yang ingin dibuat. Tekan enter/return untuk mencari atau tekan Ctrl+C untuk keluar.
+  Greetings_Search_echo               = Mencari di
+
+  Query_GrabID_prompt                 = Ketik nomor ID entri untuk melanjuti ke langkah selanjutnya
 '@

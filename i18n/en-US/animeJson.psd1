@@ -52,4 +52,7 @@ ConvertFrom-StringData @'
 
   Greetings_General_echo              = Welcome back,
   Greetings_Init_echo                 = Start typing the title of the metadata you want to create. Press enter to continue or press Ctrl+C to exit.
+  Greetings_Search_echo               = Searching on
+
+  Query_GrabID_prompt                 = Type the entry ID to proceed to another step
 '@
