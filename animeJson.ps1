@@ -61,9 +61,9 @@ $whoAmI = whoami
 
 $switchNsfwBoolean = if ("true" -eq $env:SHOW_NSFW){"false"} elseif ("false" -eq $env:SHOW_NSFW) {"true"} else {"true"}
 
-# =========
+# ==============
 # Core Functions
-# =========
+# ==============
 
 function Get-NotRoot() {
   if ($whoAmI -ne "root") {
