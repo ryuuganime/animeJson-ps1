@@ -53,120 +53,30 @@ if (-not($changeLocale)) {
 
 Write-Host $i18n.InitLocale_Replace_success, $changeLocale -ForegroundColor Green
 
+# ============
+# Core Modules
+# ============
+
+# Get-NotRoot
+Import-Module "./Modules/Get-NotRoot.psm1"
+
+# Get-WinAdmin
+Import-Module "./Modules/Get-WinAdmin.psm1"
+
+# Invoke-Init
+Import-Module "./Modules/Invoke-Init.psm1"
+
+# Invoke-RESTQuery
+Import-Module "./Modules/Invoke-RESTQuery.psm1"
+
 # ==============
 # Core Variables
 # ==============
 
-$whoAmI = whoami
-
-$switchNsfwBoolean = if ("true" -eq $env:SHOW_NSFW){"false"} elseif ("false" -eq $env:SHOW_NSFW) {"true"} else {"true"}
-
-# ==============
-# Core Functions
-# ==============
-
-function Get-NotRoot() {
-  if ($whoAmI -ne "root") {
-    Write-Host $i18n.GetNotRoot_General_success -ForegroundColor Green
-  } else {
-    Write-Host $i18n.GetNotRoot_General_e1 -ForegroundColor Red
-    exit 1 # User did not run the script as administrator/root
-  }
-}
-
-function Install-Chocolatey {
-  Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-}
-
-function Invoke-Init() {
-  # ==============================
-  # Check if modules are installed
-  # ==============================
-  Write-Host ""
-  Write-Host $i18n.GetModule_General_echo
-
-  # HJSON Converter
-  if (Get-Module -ListAvailable -Name HJSON) {
-    Write-Host "github:TomasBouda/hjson-powershell", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
-  } else {
-    Write-Host ""
-    Write-Host "github:TomasBouda/hjson-powershell", $i18n.GetModule_Module_Installed_e3 -ForegroundColor Red
-    Install-Module -Name HJSON
-  }
-
-  # dotenv File Support
-  if (Get-Module -ListAvailable -Name Set-PsEnv) {
-    Write-Host "github:rajivharris/Set-PsEnv", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
-  } else {
-    Write-Host ""
-    Write-Host "github:rajivharris/Set-PsEnv", $i18n.GetModule_Module_Installed_e3 -ForegroundColor Red
-    Install-Module -Name Set-PsEnv
-  }
-
-  # GraphQL Support
-  if (Get-Module -ListAvailable -Name PSGraphQL) {
-    Write-Host "github:anthonyg-1/PSGraphQL", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
-  } else {
-    Write-Host ""
-    Write-Host "github:anthonyg-1/PSGraphQL", $i18n.GetModule_Module_Installed_e3 -ForegroundColor Red
-    Install-Module -Name PSGraphQL
-  }
-
-  # WriteAscii generator
-  # Module not supported on non-Windows system as core modules were missing
-  # if (Get-Module -ListAvailable -Name WriteAscii) {
-  #   Write-Host "github:EliteLoser/WriteAscii", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
-  # } else {
-  #   Write-Host ""
-  #   Write-Host "github:EliteLoser/WriteAscii", $i18n.GetModule_Module_Installed_e3 -ForegroundColor Red
-  #   Install-Module -Name WriteAscii
-  # }
-
-  # Node.JS and NPM
-  if (Get-Command "npm" -ErrorAction SilentlyContinue) {
-    Write-Host "npm", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
-  } else {
-    if ($IsWindows -or $ENV:OS) {
-      Write-Host "npm", $i18n.GetModule_Module_Installed_e3 -ForegroundColor Red
-      Write-Host $i18n.GetModule_Module_Choco_Installed_e3 -ForegroundColor Yellow
-      $chocoInstall= Read-Host 
-      if ($chocoInstall -eq "y") {
-        Write-Host $i18n.GetModule_Module_Choco_echo
-        if (Get-Command "choco" -ErrorAction SilentlyContinue) {
-          Write-Host "Chocolatey", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
-          Write-Host $i18n.GetModule_Module_Choco_Npm_echo
-          choco install npm -y
-          Write-Host "npm", $i18n.GetModule_Module_Installed_success -ForegroundColor Green
-        } else {
-          Write-Host "Chocolatey", $i18n.GetModule_Module_Installed_e3 -ForegroundColor Red
-          Install-Chocolatey
-        }
-      } else {
-        Write-Host $i18n.GetModule_Module_Npm_Installed_e3 -ForegroundColor Red
-        exit 3 # Dependencies/modules/packages are not installed
-      }
-    } else {
-      Write-Host $i18n.GetModule_Module_Npm_Installed_e3 -ForegroundColor Red
-      Write-Host $i18n.GetModule_Module_Npm_Installed_echo -ForegroundColor Red
-      exit 3 # Dependencies/modules/packages are not installed
-    }
-  }
-}
-
-function Invoke-RESTQuery {
-  param (
-    [Parameter(Mandatory=$true)]
-    [string]$Uri,
-    [Parameter(Mandatory=$true)]
-    [string]$JSONProperty,
-    [Parameter(Mandatory=$true)]
-    [string[]]$Objects
-  )
-  (ConvertFrom-Json (Invoke-WebRequest -Uri $Uri).content | Select-Object -Expand $JSONProperty) | Select-Object $Objects | Format-Table
-}
+$switchNsfwBoolean = switch ($env:SHOW_NSFW) { "true" {"false"}; "false" {"true"}; default {"true"} }
 
 # ==============================
-# Check if connected to internet
+# Check if connected to internet 
 # ==============================
 
 # Clear-Host
@@ -185,7 +95,7 @@ if ($null -eq $handshakeNetwork) {
 # Request on first init
 # =====================
 
-$checkInitFile = Test-Path -Path "init_success"
+$checkInitFile = Test-Path -Path "init_success@script"
 
 if ($false -eq $checkInitFile) {
 
@@ -203,28 +113,23 @@ if ($false -eq $checkInitFile) {
 
     if ($IsWindows -or $ENV:OS) {
       Write-Host $i18n.GetOS_IsWindows_echo
-      if ([Security.Principal.WindowsIdentity]::GetCurrent().Groups -contains 'S-1-5-32-544') {
-        Write-Host $i18n.GetAdmin_IsWindows_success -ForegroundColor Green
-        Invoke-Init
-      }
-      else {
-        Write-Host $i18n.GetAdmin_IsWindows_e1 -ForegroundColor Red
-        exit 1 # User did not run the script as administrator/root
-      }
+      Get-WinAdmin
     } elseif ($IsLinux -or $ENV:OS) {
       Write-Host $i18n.GetOS_IsLinux_echo
       Get-NotRoot
-      Invoke-Init
     } elseif ($IsMacOS -or $ENV:OS) {
       Write-Host $i18n.GetOS_IsMac_echo
       Get-NotRoot
-      Invoke-Init
     } else {
       $i18n.GetOS_Unknown_e2
       exit 2 # User runs the script on unsupported OS
     }
 
+    # Request an initialization
+    Invoke-Init
+
     # Installing npm packages
+    Write-Host ""
     Write-Host $i18n.GetModule_Npm_Packages_echo
     npm install
     if (Test-Path -Path "./node_modules/") {
@@ -235,11 +140,13 @@ if ($false -eq $checkInitFile) {
     }
 
     Write-Host ""
-    Write-Host $i18n.GetModule_General_echo
+    Write-Host $i18n.OutFile_General_echo
     Out-File -FilePath "init_success" -Encoding utf8 -Append -NoNewline
-    Write-Host $i18n.GetModule_General_success -ForegroundColor Green
+    Write-Host $i18n.OutFile_General_success -ForegroundColor Green
 
+    Write-Host ""
     Write-Host $i18n.InitScript_success -ForegroundColor Green
+    Write-Host ""
     exit 0
   }
 }
@@ -250,13 +157,7 @@ if ($false -eq $checkInitFile) {
 
 if ($IsWindows -or $ENV:OS) {
   Write-Host $i18n.GetOS_IsWindows_echo
-  if ([Security.Principal.WindowsIdentity]::GetCurrent().Groups -contains 'S-1-5-32-544') {
-    Write-Host $i18n.GetAdminNegate_IsWindows_e1 -ForegroundColor Red
-    exit 1 # User did not run the script as administrator/root
-  }
-  else {
-    Write-Host $i18n.GetAdminNegate_IsWindows_success -ForegroundColor Green
-  }
+  Get-NotWinAdmin
 } elseif ($IsLinux -or $ENV:OS) {
   Write-Host $i18n.GetOS_IsLinux_echo
   Get-NotRoot
@@ -306,11 +207,12 @@ Write-Host ""
 Write-Host $i18n.Greetings_Init_echo -ForegroundColor Yellow
 $searchQueryRaw = Read-Host -Prompt $i18n.General_Query
 # Do not show error when user pressed Ctrl+C
-if ($null -ne $searchQueryRaw) {
-  $searchQueryEncoded = [uri]::EscapeDataString($searchQueryRaw)
-} else {
-  Write-Host ""
+
+if (-not($searchQueryRaw)) {
+  Write-Host "Exiting..."
   exit 0
+} else {
+  $searchQueryEncoded = [uri]::EscapeDataString($searchQueryRaw)
 }
 
 # Search on MyAnimeList and get the anime metadata
@@ -319,6 +221,11 @@ Invoke-RESTQuery -Uri "https://api.jikan.moe/v4/anime?q=$($searchQueryEncoded)&l
 
 Write-Host $i18n.Query_GrabID_prompt -ForegroundColor Yellow
 $entry_id_MAL = Read-Host -Prompt $i18n.General_Query
+$entry_id_Shikimori = $entry_id_MAL
+
+# Confirming if Shikimori metadata matches with MyAnimeList
+# Write-Host $i18n.Greetings_Search_echo, "MyAnimeList:", `"$searchQueryRaw`", "(MAL ID:$($entry_id_MAL)" -ForegroundColor Yellow
+# Invoke-RESTQuery -Uri "https://shikimori.one/api/animes/$($entry_id_Shikimori)" 
 
 # Write-Host $i18n.Greetings_Search_echo, "AniList:", `"$searchQueryRaw`" -ForegroundColor Yellow
 # $anilistGQLSearchMALID = '
