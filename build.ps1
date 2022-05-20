@@ -40,39 +40,33 @@ if (-not($changeLocale)) {
 Write-Host $i18n.InitLocale_Replace_success, $changeLocale -ForegroundColor Green
 
 
-# ==============
-# Core Functions
-# ==============
+# ============
+# Core Modules
+# ============
 
-function Get-NotRoot() {
-  if ($whoAmI -ne "root") {
-    Write-Host $i18n.GetNotRoot_General_success -ForegroundColor Green
-  } else {
-    Write-Host $i18n.GetNotRoot_General_e1 -ForegroundColor Red
-    exit 1 # User did not run the script as administrator/root
-  }
-}
+# Get-NotRoot
+
+Import-Module "./Modules/Get-NotRoot.psm1"
+
+# Get-WinAdmin
+
+Import-Module "./Modules/Get-WinAdmin.psm1"
+
+# ===========
+# Start Logic
+# ===========
 
 # Check system
 
 if ($IsWindows -or $ENV:OS) {
   Write-Host $i18n.GetOS_IsWindows_echo
-  if ([Security.Principal.WindowsIdentity]::GetCurrent().Groups -contains 'S-1-5-32-544') {
-    Write-Host $i18n.GetAdmin_IsWindows_success -ForegroundColor Green
-    Invoke-Init
-  }
-  else {
-    Write-Host $i18n.GetAdmin_IsWindows_e1 -ForegroundColor Red
-    exit 1 # User did not run the script as administrator/root
-  }
+  Get-WinAdmin
 } elseif ($IsLinux -or $ENV:OS) {
   Write-Host $i18n.GetOS_IsLinux_echo
   Get-NotRoot
-  Invoke-Init
 } elseif ($IsMacOS -or $ENV:OS) {
   Write-Host $i18n.GetOS_IsMac_echo
   Get-NotRoot
-  Invoke-Init
 } else {
   $i18n.GetOS_Unknown_e2
   exit 2 # User runs the script on unsupported OS
