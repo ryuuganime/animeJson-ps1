@@ -1,7 +1,8 @@
 ##################################
 #          Ryuuganime            #
 ##################################
-init_success
+init_success@script
+init_success@build
 .env
 [0-9]*.json
 [0-9]*.hjson
