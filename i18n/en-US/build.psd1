@@ -19,9 +19,4 @@ ConvertFrom-StringData @'
 
   GetAdmin_IsWindows_success          = Script is running as administrator
   GetAdmin_IsWindows_e1               = Script is not running as administrator, please to make sure to run as administrator
-
-  
-
-  GetAdminNegate_IsWindows_e1         = Script is running as administrator, please to make sure to not run as administrator
-  GetAdminNegate_IsWindows_success    = Script is not running as administrator
 '@
